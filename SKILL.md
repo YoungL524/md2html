@@ -1,35 +1,27 @@
 ---
 name: md2html
-description: 一个极简但好用的 md→html skill。把 Markdown 一键生成自包含 HTML，内置两种样式：docs（技术文档阅读版）与 presentation（16:9 幻灯片，按 H2 分页，支持键盘翻页）。触发词：md转html、markdown转html、md to html、生成html、导出html、把这篇md做成网页、做成文档页、做成演示稿、做成ppt、slide、幻灯片。
+description: 一个极简的 md → html 转换 skill。基于 Pandoc + 两套主题（docs/presentation），把 Markdown 一键加工成可发布的 HTML：文档版（带目录、复制代码、阅读进度）或幻灯片版（16:9，按 H2 自动分页，键盘翻页）。触发词：md转html、markdown转html、生成html、做成网页、做成文档页面、做成ppt、幻灯片、slide。
 ---
 
 # md2html
 
-> md 是源，html 是产物。
+> md 是源文件，html 是产物。
 
 ## 能力
 
-- **能力：md → html**
-  - **docs**：技术文档风格（目录/阅读进度/代码复制）
-  - **presentation**：幻灯片风格（16:9、按 `##` 分页、键盘翻页）
+- **能力**：把 `.md` 转为 `.html`
+- **主题**：
+  - `docs`：技术文档阅读版（可选 TOC）
+  - `presentation`：16:9 幻灯片（按 `##` 分页）
 
-## 使用方式（给 Agent 的指令模板）
-
-你可以直接对 Agent 说：
-
-- 「把 `README.md` 转成 html，用 `docs` 主题」
-- 「把 `xxx.md` 做成幻灯片，用 `presentation` 主题」
-- 「输出到 `dist/xxx.html`」
-
-## 底层命令
-
-本 skill 底层调用：
+## 使用方式（底层命令）
 
 ```bash
-python scripts/md_to_html.py <input.md> --theme <docs|presentation> -o <output.html>
+python scripts/md_to_html.py input.md --theme docs -o output.html
+python scripts/md_to_html.py input.md --theme presentation -o output.html
 ```
 
 ## 依赖
 
-- **pandoc**（必须，用户本机安装并加入 PATH）
-- Python ≥ 3.10
+- 需要本机安装 `pandoc` 并在 PATH 中可用
+- 需要 Python ≥ 3.10

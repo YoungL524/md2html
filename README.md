@@ -17,32 +17,6 @@
 
 ---
 
-## 作为 Skill / Plugin 使用（推荐）
-
-本项目提供 `SKILL.md`，可作为 [skills.sh](https://skills.sh) 生态的 skill 安装到 Claude Code / Cursor 等工具中。
-
-### 安装
-
-```bash
-npx skills add YoungL524/md2html
-```
-
-### 在 Claude Code / Cursor 里怎么用
-
-直接用自然语言描述你的目标，并指明主题即可：
-
-- **docs（文档）**
-  - 「把 `README.md` 转成 HTML，用 `docs` 主题」
-- **presentation（幻灯片）**
-  - 「把 `xxx.md` 做成幻灯片，用 `presentation` 主题」
-
-主题名固定为：
-
-- `docs`
-- `presentation`
-
----
-
 ## 快速开始
 
 ### 1. 安装依赖
@@ -64,6 +38,35 @@ apt install pandoc
 ```
 
 Python ≥ 3.10，无需安装第三方 pip 包。
+
+---
+
+## 作为 Skills / Plugin 使用（推荐）
+
+本仓库内置 `SKILL.md`，可作为 **skills.sh** 生态里的一个 skill 安装使用。
+
+### 安装
+
+```bash
+npx skills add YoungL524/md2html
+```
+
+### 在 Claude Code / Cursor 里怎么说
+
+- **生成文档版 HTML（docs）**
+
+  把 `README.md` 转成 HTML，用 `docs` 主题。
+
+- **生成幻灯片 HTML（presentation）**
+
+  把 `README.md` 做成 16:9 的幻灯片 HTML，用 `presentation` 主题（按二级标题分页），并输出到同目录。
+
+### 运行时依赖
+
+- **必须**：本机已安装 `pandoc` 且在 PATH 中可用（本仓库不内置二进制）
+- **必须**：本机可运行 `python`（Python ≥ 3.10）
+
+---
 
 ### 2. 使用
 
