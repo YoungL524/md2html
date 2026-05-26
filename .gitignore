@@ -1,0 +1,33 @@
+# Reference projects
+huashu-md-html/
+
+# Pandoc binary (users install their own)
+pandoc-*/
+*.zip
+
+# Private/local artifacts
+CLAUDE_BAK*
+
+# Generated HTML outputs
+*.html
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+#qita
+demo/

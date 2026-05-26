@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="$if(lang)$$lang$$else$zh-CN$endif$" xml:lang="$if(lang)$$lang$$else$zh-CN$endif$">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="generator" content="md2html · presentation theme" />
+$for(author-meta)$  <meta name="author" content="$author-meta$" />
+$endfor$
+$if(date-meta)$  <meta name="dcterms.date" content="$date-meta$" />$endif$
+$if(keywords)$  <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />$endif$
+$if(description-meta)$  <meta name="description" content="$description-meta$" />$endif$
+  <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+$for(css)$  <link rel="stylesheet" href="$css$" />
+$endfor$
+$for(header-includes)$
+  $header-includes$
+$endfor$
+</head>
+<body>
+$for(include-before)$
+  $include-before$
+$endfor$
+
+  <div class="ppt-meta" id="pptMeta">
+    <div id="pptTitle">$title$</div>
+    <div id="pptSubtitle">$if(subtitle)$$subtitle$$endif$</div>
+    <div id="pptAuthor">$if(author)$$for(author)$$author$$sep$, $endfor$$endif$</div>
+    <div id="pptDate">$if(date)$$date$$endif$</div>
+  </div>
+
+  <div class="presentation-container" id="pptContainer">
+    <div class="slide-number" id="slideNum"></div>
+    <div class="controls">
+      <button class="btn" id="prevBtn" type="button">上一页</button>
+      <button class="btn" id="nextBtn" type="button">下一页</button>
+    </div>
+  </div>
+
+  <div class="keyboard-hint">
+    <span>← / → 键切换</span>
+    <span>空格键下一页</span>
+  </div>
+
+  <article class="ppt-source" id="pptSource">
+$body$
+  </article>
+
+$for(include-after)$
+  $include-after$
+$endfor$
+
+  <script>
+    (function () {
+      function textOf(id) {
+        var el = document.getElementById(id);
+        return el ? (el.textContent || '').trim() : '';
+      }
+
+      var meta = {
+        title: textOf('pptTitle'),
+        subtitle: textOf('pptSubtitle'),
+        author: textOf('pptAuthor'),
+        date: textOf('pptDate')
+      };
+
+      var container = document.getElementById('pptContainer');
+      var source = document.getElementById('pptSource');
+      if (!container || !source) return;
+
+      function createEl(tag, className, text) {
+        var el = document.createElement(tag);
+        if (className) el.className = className;
+        if (typeof text === 'string') el.textContent = text;
+        return el;
+      }
+
+      function createCoverSlide() {
+        var slide = createEl('div', 'slide slide-cover');
+        slide.appendChild(createEl('div', 'accent-line'));
+        slide.appendChild(createEl('h1', '', meta.title || document.title || ''));
+        var subtitle = meta.subtitle || [meta.author, meta.date].filter(Boolean).join(' · ');
+        if (subtitle) slide.appendChild(createEl('p', '', subtitle));
+        return slide;
+      }
+
+      function createContentSlide(title, elements) {
+        var slide = createEl('div', 'slide');
+        var header = createEl('div', 'slide-header');
+        header.appendChild(createEl('h2', '', title || ''));
+        slide.appendChild(header);
+
+        var body = createEl('div', 'slide-body');
+        elements.forEach(function (el) {
+          body.appendChild(el);
+        });
+        slide.appendChild(body);
+        enhanceSlide(body);
+        return slide;
+      }
+
+      function enhanceSlide(root) {
+        root.querySelectorAll('ul').forEach(function (ul) {
+          if (!ul.classList.contains('list-premium')) ul.classList.add('list-premium');
+        });
+
+        root.querySelectorAll('pre > code').forEach(function (code) {
+          var pre = code.parentElement;
+          if (!pre || pre.closest('.code-container')) return;
+
+          var wrapper = createEl('div', 'code-container');
+          var lang = 'code';
+          var m = (code.className || '').match(/language-([A-Za-z0-9_-]+)/);
+          if (m && m[1]) lang = m[1];
+          wrapper.appendChild(createEl('span', 'code-lang', lang));
+
+          pre.parentElement.insertBefore(wrapper, pre);
+          wrapper.appendChild(pre);
+        });
+      }
+
+      function buildSlidesFromSource() {
+        var blocks = Array.prototype.slice.call(source.children);
+        var sections = [];
+        var current = null;
+
+        blocks.forEach(function (el) {
+          var tag = (el.tagName || '').toUpperCase();
+          if (tag === 'H2') {
+            current = { title: (el.textContent || '').trim(), elements: [] };
+            sections.push(current);
+            return;
+          }
+          if (!current) {
+            current = { title: '', elements: [] };
+            sections.push(current);
+          }
+          current.elements.push(el);
+        });
+
+        var slides = [];
+        slides.push(createCoverSlide());
+        sections.forEach(function (sec) {
+          slides.push(createContentSlide(sec.title, sec.elements));
+        });
+
+        return slides;
+      }
+
+      var slides = buildSlidesFromSource();
+      slides.forEach(function (s, idx) {
+        s.setAttribute('data-index', String(idx + 1));
+        container.insertBefore(s, container.firstChild);
+      });
+
+      var slideNum = document.getElementById('slideNum');
+      var prevBtn = document.getElementById('prevBtn');
+      var nextBtn = document.getElementById('nextBtn');
+      var currentSlide = 1;
+      var totalSlides = slides.length;
+
+      function showSlide(index) {
+        if (index < 1) index = 1;
+        if (index > totalSlides) index = totalSlides;
+
+        slides.forEach(function (slide) {
+          slide.classList.remove('active');
+          if (parseInt(slide.getAttribute('data-index'), 10) === index) {
+            slide.classList.add('active');
+          }
+        });
+
+        currentSlide = index;
+        if (slideNum) slideNum.textContent = currentSlide + ' / ' + totalSlides;
+
+        if (prevBtn) prevBtn.style.opacity = currentSlide === 1 ? '0.4' : '1';
+        if (nextBtn) nextBtn.style.opacity = currentSlide === totalSlides ? '0.4' : '1';
+      }
+
+      if (prevBtn) prevBtn.addEventListener('click', function () { showSlide(currentSlide - 1); });
+      if (nextBtn) nextBtn.addEventListener('click', function () { showSlide(currentSlide + 1); });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+          showSlide(currentSlide + 1);
+        } else if (e.key === 'ArrowLeft') {
+          showSlide(currentSlide - 1);
+        }
+      });
+
+      showSlide(1);
+    })();
+  </script>
+</body>
+</html>
