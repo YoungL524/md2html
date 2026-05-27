@@ -17,6 +17,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -211,6 +212,7 @@ def build_pandoc_command(
     template_path: Path | None,
     title: str,
     args: argparse.Namespace,
+    css_header_file: Path | None = None,
 ) -> list[str]:
     cmd = [
         pandoc_bin,
@@ -223,9 +225,10 @@ def build_pandoc_command(
         "-o", str(output_html),
         "--standalone",
     ]
-    cmd.extend(["--css", str(css_path)])
     if template_path:
         cmd.extend(["--template", str(template_path)])
+    if css_header_file:
+        cmd.extend(["--include-in-header", str(css_header_file)])
     if should_emit_toc(args):
         cmd.extend(["--toc", "--toc-depth=3"])
     if args.katex:
@@ -254,15 +257,26 @@ def main() -> int:
         if images:
             copy_images_alongside(images, src_base, output_html.parent, args.quiet)
 
-    cmd = build_pandoc_command(
-        pandoc_bin, "-", output_html, css_path, template_path, title, args,
-    )
+    css_content = css_path.read_text(encoding="utf-8")
+    css_block = f"<style>\n{css_content}\n</style>\n"
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".html", encoding="utf-8", delete=False,
+    ) as tmp:
+        tmp.write(css_block)
+        css_header_file = Path(tmp.name)
 
     try:
+        cmd = build_pandoc_command(
+            pandoc_bin, "-", output_html, css_path, template_path, title, args,
+            css_header_file=css_header_file,
+        )
         proc = subprocess.run(cmd, input=md_text, capture_output=True, text=True, encoding="utf-8")
     except FileNotFoundError:
         sys.stderr.write(HELP_PANDOC)
         return 2
+    finally:
+        css_header_file.unlink(missing_ok=True)
 
     if proc.returncode != 0:
         sys.stderr.write(proc.stderr or "[error] pandoc failed without stderr output.\n")

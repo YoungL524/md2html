@@ -10,8 +10,6 @@ $if(date-meta)$  <meta name="dcterms.date" content="$date-meta$" />$endif$
 $if(keywords)$  <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />$endif$
 $if(description-meta)$  <meta name="description" content="$description-meta$" />$endif$
   <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
-$for(css)$  <link rel="stylesheet" href="$css$" />
-$endfor$
 $for(header-includes)$
   $header-includes$
 $endfor$
